@@ -1,0 +1,43 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+
+data = pd.DataFrame({
+    "Name": ["Alice", "Bob", "Charlie", "David"],
+    "Score": [85, 92, 78, 90],
+    "Passed": ["Yes", "Yes", "No", "Yes"]
+})
+
+avg_score = data["Score"].mean()
+max_score = data["Score"].max()
+pass_count = data["Passed"].value_counts().get("Yes", 0)
+
+
+plt.figure(figsize=(6, 4))
+plt.bar(data["Name"], data["Score"], color='skyblue')
+plt.axhline(avg_score, color='red', linestyle='--', label=f'Average Score ({avg_score:.2f})')
+plt.title("Student Scores")
+plt.ylabel("Score")
+plt.legend()
+plt.tight_layout()
+plt.savefig("score_chart.png")  
+
+
+with PdfPages("analysis_report.pdf") as pdf:
+    
+    fig, ax = plt.subplots(figsize=(8.5, 11))
+    ax.axis('off')
+    lines = [
+        "Student Score Report",
+        "-----------------------------",
+        f"Average Score: {avg_score:.2f}",
+        f"Highest Score: {max_score}",
+        f"Students Passed: {pass_count} of {len(data)}",
+        "",
+        "Scores by Student:",
+    ] + [f"{row['Name']}: {row['Score']} ({row['Passed']})" for _, row in data.iterrows()]
+    
+    for i, line in enumerate(lines):
+        ax.text(0.1, 1 - 0.05 * i, line, fontsize=12)
+
+    pdf.savefig(fig)
